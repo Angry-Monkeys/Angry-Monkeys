@@ -10,45 +10,10 @@ import OrgUseReq from './OrgUseReq'
 import DonUseReq from './DonUseReq'
 import {XCircleIcon} from "@heroicons/react/16/solid";
 import styled from 'styled-components';
+import { useEffect } from 'react'
 
 
-const filters = [
-    {
-        id: 'color',
-        name: 'Color',
-        options: [
-            { value: 'white', label: 'White', checked: false },
-            { value: 'beige', label: 'Beige', checked: false },
-            { value: 'blue', label: 'Blue', checked: true },
-            { value: 'brown', label: 'Brown', checked: false },
-            { value: 'green', label: 'Green', checked: false },
-            { value: 'purple', label: 'Purple', checked: false },
-        ],
-    },
-    {
-        id: 'category',
-        name: 'Category',
-        options: [
-            { value: 'new-arrivals', label: 'New Arrivals', checked: false },
-            { value: 'sale', label: 'Sale', checked: false },
-            { value: 'travel', label: 'Travel', checked: true },
-            { value: 'organization', label: 'Organization', checked: false },
-            { value: 'accessories', label: 'Accessories', checked: false },
-        ],
-    },
-    {
-        id: 'size',
-        name: 'Size',
-        options: [
-            { value: '2l', label: '2L', checked: false },
-            { value: '6l', label: '6L', checked: false },
-            { value: '12l', label: '12L', checked: false },
-            { value: '18l', label: '18L', checked: false },
-            { value: '20l', label: '20L', checked: false },
-            { value: '40l', label: '40L', checked: true },
-        ],
-    },
-]
+
 
 function classNames(...classes) {
     return classes.filter(Boolean).join(' ')
@@ -62,16 +27,19 @@ export default function Example({title , results , type}) {
 
     const [searchItem, setSearchItem] = useState('');
     const [filteredResults, setFilteredResults] = useState(results);
-    
+
+    const [selectedFilters, setSelectedFilters] = useState([]);
 
     
     let page = <></>;
     let subCategories =[];
+    let filters = [];
 
-    const addNameToOrganizationTypes = (organizationTypes) => {
-        const uniqueOrganizationTypes = [...new Set(organizationTypes)];
-        return uniqueOrganizationTypes.map(type => ({ name: type }));
-    };
+   
+    useEffect(() => {
+        filterItems();
+      }, [selectedFilters]);
+
   
     if (Array.isArray(results) && results.length > 0) {
       if (type === 'adminReqOrgs') {
@@ -82,18 +50,38 @@ export default function Example({title , results , type}) {
 
 
         /*fetches all subcategories from the result*/
-        const uniqueCategories = [...new Set(results.map(org => org.organizationType))];
-        subCategories = addNameToOrganizationTypes(uniqueCategories);
+        subCategories= Array.from(new Set(results.map(item => item.organizationType))).map(role => ({ name: role }));
+
+        const areaOptions = Array.from(new Set(results.map(item => item.organizationAddress.area))).map(area => ({ value: area, checked: false }));
+        const governorateOptions = Array.from(new Set(results.map(item => item.organizationAddress.governorate))).map(governorate => ({ value: governorate, checked: false}));
+        
+        filters = [
+                {
+                    id: 'area',
+                    name: 'Area',
+                    options: areaOptions
+                },
+                {
+                    id: 'governorate',
+                    name: 'Governorate',
+                    options: governorateOptions
+                }
+        ]
       } 
       else if (type === 'donorApplicationProBono') {
            
             page = <DonUseReq donors = {filteredResults}/>;
-            subCategories = [
-                            {name :'Teacher'},
-                            {name:'Doctor'}
-                            ];
+            subCategories = Array.from(new Set(results.map(item => item.role))).map(role => ({ name: role }));    
       }
     }
+
+
+    
+  
+
+   
+    
+        
 
     const filterByCategory = (categoryName) => {
         let filteredItems = [];
@@ -127,6 +115,32 @@ export default function Example({title , results , type}) {
     const toggleSearch = () => { // Add this function
         setIsSearchOpen(!isSearchOpen);
     };
+
+    const handleCheckboxChange = (selectedCategory) =>{
+        if (selectedFilters.includes(selectedCategory)) {
+            let filters = selectedFilters.filter((el) => el !== selectedCategory);
+            setSelectedFilters(filters);
+          } else {
+            setSelectedFilters([...selectedFilters, selectedCategory]);
+          }
+        console.log(selectedFilters);
+        
+    };
+
+    const filterItems = () => {
+
+        if(type === 'adminReqOrgs'){
+            if (selectedFilters.length > 0) {
+            let tempItems = selectedFilters.map((selectedCategory) => {
+                let temp = results.filter((item) => item.organizationAddress.area === selectedCategory || item.organizationAddress.governorate === selectedCategory);
+                return temp;
+            });
+            setFilteredResults(tempItems.flat());
+            } else {
+            setFilteredResults([...results]);
+            }
+        }
+      };
 
     return (
         <div className="bg-white">
@@ -203,18 +217,20 @@ export default function Example({title , results , type}) {
                                                                 {section.options.map((option, optionIdx) => (
                                                                     <div key={option.value} className="flex items-center">
                                                                         <input
-                                                                            id={`filter-mobile-${section.id}-${optionIdx}`}
+                                                                            id={`filter-${section.id}-${optionIdx}`}
                                                                             name={`${section.id}[]`}
                                                                             defaultValue={option.value}
                                                                             type="checkbox"
                                                                             defaultChecked={option.checked}
+                                                                            onChange={()=>handleCheckboxChange(option.value)} 
+                                                                             
                                                                             className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                                                         />
                                                                         <label
                                                                             htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
                                                                             className="ml-3 min-w-0 flex-1 text-gray-500"
                                                                         >
-                                                                            {option.label}
+                                                                            {option.value}
                                                                         </label>
                                                                     </div>
                                                                 ))}
@@ -316,13 +332,14 @@ export default function Example({title , results , type}) {
                                                                     defaultValue={option.value}
                                                                     type="checkbox"
                                                                     defaultChecked={option.checked}
+                                                                    onChange={()=>handleCheckboxChange(option.value)} 
                                                                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                                                 />
                                                                 <label
                                                                     htmlFor={`filter-${section.id}-${optionIdx}`}
                                                                     className="ml-3 text-sm text-gray-600"
                                                                 >
-                                                                    {option.label}
+                                                                    {option.value}
                                                                 </label>
                                                             </div>
                                                         ))}

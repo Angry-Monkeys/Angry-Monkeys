@@ -299,7 +299,7 @@
     {
       "id": "1",
       "name": "Donor A",
-      "role": "doctor",
+      "role": "Doctor",
       "verified": true,
       "firstName": "Alice",
       "lastName": "Smith",
@@ -318,7 +318,7 @@
     {
       "id": "2",
       "name": "Donor B",
-      "role": "teacher",
+      "role": "Teacher",
       "verified": true,
       "firstName": "Bob",
       "lastName": "Johnson",
@@ -337,7 +337,7 @@
     {
       "id": "3",
       "name": "Donor C",
-      "role": "doctor",
+      "role": "Doctor",
       "verified": true,
       "firstName": "Charlie",
       "lastName": "Brown",
@@ -356,7 +356,7 @@
     {
       "id": "4",
       "name": "Donor D",
-      "role": "teacher",
+      "role": "Doctor",
       "verified": false,
       "firstName": "Diana",
       "lastName": "Williams",
@@ -375,7 +375,7 @@
     {
       "id": "5",
       "name": "Donor E",
-      "role": "doctor",
+      "role": "Doctor",
       "verified": true,
       "firstName": "Eva",
       "lastName": "Davis",
@@ -394,7 +394,7 @@
     {
       "id": "6",
       "name": "Donor F",
-      "role": "teacher",
+      "role": "Teacher",
       "verified": false,
       "firstName": "Frank",
       "lastName": "Martinez",
